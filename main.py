@@ -2,6 +2,7 @@ from mmcv import Config, mkdir_or_exist
 from mmdet.apis import set_random_seed
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
+import pickle
 from mmdet.apis import train_detector
 import os
 
@@ -12,7 +13,6 @@ cfg.dataset_type = 'COCODataset'
 cfg.data.test.ann_file = 'coco-formatted-info-val.json'
 cfg.data.test.img_prefix = 'webis-webseg-20-screenshots/'
 cfg.data.test.classes = ('webpage-segmentation',)
-
 
 cfg.data.train.ann_file = 'coco-formatted-info-train.json'
 cfg.data.train.img_prefix = 'webis-webseg-20-screenshots/'
@@ -31,13 +31,16 @@ for dictionary in cfg.model.roi_head.mask_head:
 cfg.load_from = '/home/liujqian/Documents/projects/page-segmentation/checkpoints/htc_x101_64x4d_fpn_16x1_20e_coco_20200318-b181fd7a.pth'
 
 # Set up working dir to save files and logs.
-cfg.work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir'
+cfg.work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir_second_try_full_screenshot'
 
 # The original learning rate (LR) is set for 8-GPU training.
 # We divide it by 8 since we only use one GPU.
-cfg.optimizer.lr = 0.02 / 16
+batch_size = 3
+cfg.optimizer.lr = (0.01 / 8) * batch_size
 cfg.lr_config.warmup = None
 cfg.log_config.interval = 10
+cfg.data.samples_per_gpu = batch_size
+cfg.workers_per_gpu = batch_size
 
 # We can set the evaluation interval to reduce the evaluation times
 cfg.evaluation.interval = 2
@@ -53,7 +56,7 @@ cfg.device = 'cuda'
 cfg.model.roi_head.semantic_roi_extractor = None
 cfg.model.roi_head.semantic_head = None
 cfg.train_pipeline[-1]['keys'] = cfg.train_pipeline[-1]['keys'][0:4]
-cfg.data.train.pipeline[-1]['keys'] =cfg.data.train.pipeline[-1]['keys'][0:4]
+cfg.data.train.pipeline[-1]['keys'] = cfg.data.train.pipeline[-1]['keys'][0:4]
 # We can also use tensorboard to log the training process
 cfg.log_config.hooks = [
     dict(type='TextLoggerHook'),
@@ -71,3 +74,6 @@ model.CLASSES = datasets[0].CLASSES
 # Create work_dir
 mkdir_or_exist(os.path.abspath(cfg.work_dir))
 train_detector(model, datasets, cfg, distributed=False, validate=True)
+fh = open(os.path.join(cfg.work_dir, "final_model.pickle"), 'wb')
+pickle.dump(model, fh)
+fh.close()
