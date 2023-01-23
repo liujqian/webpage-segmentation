@@ -1,10 +1,11 @@
 # This script is used to transform and combine all the annotations of the webis-webseg-20 dataset to the coco annotation
-# format so it can be used for the mmdetection library.
+# format, so it can be used for the mmdetection library.
 import os.path
 
 import mmcv
 
-dataset_dirname = "webis-webseg-20-combined"
+dataset_dirname = "webis-webseg-20"
+ground_truth_dir_name = "webis-webseg-20-ground-truth"
 annotation_file_name = "ground-truth.json"
 polygons_with_holes = []
 """
@@ -42,9 +43,9 @@ categories = [{
 
 
 def get_annotations_of_image(img_id: str, next_annotation_id: int) -> (dict, list[dict]):
-    filepath = os.path.join(dataset_dirname, img_id, annotation_file_name)
+    filepath = os.path.join(dataset_dirname, ground_truth_dir_name, img_id, annotation_file_name)
     data = mmcv.load(filepath, file_format="json")
-    image = {"id": int(img_id), "width": data["width"], "height": data["height"], "file_name": img_id+'.png'}
+    image = {"id": int(img_id), "width": data["width"], "height": data["height"], "file_name": img_id + '.png'}
     segs = data["segmentations"]
     annotations = []
     if "majority-vote" not in segs:
@@ -86,7 +87,7 @@ categories = [
 coco_formatted_info_train = {"categories": categories, "images": [], "annotations": []}
 coco_formatted_info_val = {"categories": categories, "images": [], "annotations": []}
 next_annotation_id = 0
-for folder in os.scandir(dataset_dirname):
+for folder in os.scandir(os.path.join(dataset_dirname, ground_truth_dir_name)):
     folder_name = folder.name
     img_info, annotations = get_annotations_of_image(folder_name, next_annotation_id)
     next_annotation_id += len(annotations)
