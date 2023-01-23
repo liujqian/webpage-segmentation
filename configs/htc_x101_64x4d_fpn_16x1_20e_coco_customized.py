@@ -39,8 +39,8 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=1,
-    workers_per_gpu=1,
+    samples_per_gpu=3,
+    workers_per_gpu=3,
     train=dict(
         type='CocoDataset',
         ann_file='coco-formatted-info-train.json',
@@ -133,7 +133,6 @@ log_config = dict(
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/home/liujqian/Documents/projects/page-segmentation/checkpoints/htc_x101_64x4d_fpn_16x1_20e_coco_20200318-b181fd7a.pth'
 resume_from = None
 workflow = [('train', 1)]
 opencv_num_threads = 0
@@ -356,7 +355,7 @@ model = dict(
             nms=dict(type='nms', iou_threshold=0.5),
             max_per_img=100,
             mask_thr_binary=0.5)))
-work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir'
+work_dir = './work_dir'
 seed = 0
 gpu_ids = range(0, 1)
 device = 'cuda'
