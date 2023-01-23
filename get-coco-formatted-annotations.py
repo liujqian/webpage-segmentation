@@ -44,7 +44,7 @@ categories = [{
 def get_annotations_of_image(img_id: str, next_annotation_id: int) -> (dict, list[dict]):
     filepath = os.path.join(dataset_dirname, img_id, annotation_file_name)
     data = mmcv.load(filepath, file_format="json")
-    image = {"id": int(img_id), "width": data["width"], "height": data["height"], "filename": "screenshot.png"}
+    image = {"id": int(img_id), "width": data["width"], "height": data["height"], "file_name": img_id+'.png'}
     segs = data["segmentations"]
     annotations = []
     if "majority-vote" not in segs:
@@ -55,7 +55,6 @@ def get_annotations_of_image(img_id: str, next_annotation_id: int) -> (dict, lis
             if len(polygon) > 1:
                 polygon_info = {"img-id": img_id, "multipoligon-idx": mp_id, "polygon-idx": p_id}
                 polygons_with_holes.append(polygon_info)
-                print("Seeing a polygon with holes: " + str(polygon_info))
             ring = polygon[0]
             rezipped_coordinates = [*zip(*ring)]
             xmin, xmax, ymin, ymax = (
@@ -66,9 +65,9 @@ def get_annotations_of_image(img_id: str, next_annotation_id: int) -> (dict, lis
             )
             annotation = {
                 "id": next_annotation_id,
-                "img_id": img_id,
+                "image_id": int(img_id),
                 "category_id": 0,
-                "segmentation": [x for point in ring for x in point],
+                "segmentation": [[x for point in ring for x in point]],
                 "bbox": [xmin, ymin, xmax - xmin, ymax - ymin],
                 "area": (xmax - xmin) * (ymax - ymin),
                 "iscrowd": 0
@@ -84,12 +83,18 @@ categories = [
         "name": "webpage-segmentation",
     }
 ]
-coco_formatted_info = {"categories": categories, "images": [], "annotations": []}
+coco_formatted_info_train = {"categories": categories, "images": [], "annotations": []}
+coco_formatted_info_val = {"categories": categories, "images": [], "annotations": []}
 next_annotation_id = 0
 for folder in os.scandir(dataset_dirname):
     folder_name = folder.name
     img_info, annotations = get_annotations_of_image(folder_name, next_annotation_id)
     next_annotation_id += len(annotations)
+    if int(folder_name) > 8999:
+        coco_formatted_info = coco_formatted_info_val
+    else:
+        coco_formatted_info = coco_formatted_info_train
     coco_formatted_info["images"].append(img_info)
     coco_formatted_info["annotations"].extend(annotations)
-mmcv.dump(coco_formatted_info, "coco-formatted-info.json", "json")
+mmcv.dump(coco_formatted_info_train, "coco-formatted-info-train.json", "json")
+mmcv.dump(coco_formatted_info_val, "coco-formatted-info-val.json", "json")
