@@ -42,7 +42,7 @@ categories = [{
 """
 
 
-def get_annotations_of_image(img_id: str, next_annotation_id: int) -> (dict, list[dict]):
+def get_annotations_of_image(img_id: str, next_annotation_id: int) -> (dict, list):
     filepath = os.path.join(dataset_dirname, ground_truth_dir_name, img_id, annotation_file_name)
     data = mmcv.load(filepath, file_format="json")
     image = {"id": int(img_id), "width": data["width"], "height": data["height"], "file_name": img_id + '.png'}
