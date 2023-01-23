@@ -6,7 +6,7 @@ import pickle
 from mmdet.apis import train_detector
 import os
 
-cfg = Config.fromfile('/home/liujqian/Documents/repos/mmdetection/configs/htc/htc_x101_64x4d_fpn_16x1_20e_coco-copy.py')
+cfg = Config.fromfile('mmdet-configs /configs/htc/htc_x101_64x4d_fpn_16x1_20e_coco-copy.py')
 # make changes to the base configuration based on the tutorial given on https://github.com/open-mmlab/mmdetection/blob/master/demo/MMDet_InstanceSeg_Tutorial.ipynb
 cfg.dataset_type = 'COCODataset'
 
