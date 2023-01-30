@@ -40,7 +40,7 @@ test_pipeline = [
 ]
 data = dict(
     samples_per_gpu=3,
-    workers_per_gpu=3,
+    workers_per_gpu=1,
     train=dict(
         type='CocoDataset',
         ann_file='coco-formatted-info-train.json',
@@ -66,7 +66,7 @@ data = dict(
                 type='Collect',
                 keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'])
         ],
-        classes=('webpage-segmentation', )),
+        classes=('webpage-segmentation',)),
     val=dict(
         type='CocoDataset',
         ann_file='coco-formatted-info-val.json',
@@ -90,7 +90,7 @@ data = dict(
                     dict(type='Collect', keys=['img'])
                 ])
         ],
-        classes=('webpage-segmentation', )),
+        classes=('webpage-segmentation',)),
     test=dict(
         type='CocoDataset',
         ann_file='coco-formatted-info-val.json',
@@ -114,9 +114,9 @@ data = dict(
                     dict(type='Collect', keys=['img'])
                 ])
         ],
-        classes=('webpage-segmentation', )))
+        classes=('webpage-segmentation',)))
 evaluation = dict(metric=['bbox', 'segm'], interval=2)
-optimizer = dict(type='SGD', lr=0.00125, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.00375, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy='step',
@@ -124,7 +124,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=0.001,
     step=[16, 19])
-runner = dict(type='EpochBasedRunner', max_epochs=20)
+runner = dict(type='EpochBasedRunner', max_epochs=8)
 checkpoint_config = dict(interval=2)
 log_config = dict(
     interval=10,
@@ -133,6 +133,7 @@ log_config = dict(
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
+load_from = '/home/liujqian/Documents/projects/page-segmentation/work_dir_third_try_full_screenshot/epoch_2.pth'
 resume_from = None
 workflow = [('train', 1)]
 opencv_num_threads = 0
@@ -355,7 +356,8 @@ model = dict(
             nms=dict(type='nms', iou_threshold=0.5),
             max_per_img=100,
             mask_thr_binary=0.5)))
-work_dir = './work_dir'
+work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir_fourth_try_full_screenshot'
+workers_per_gpu = 3
 seed = 0
 gpu_ids = range(0, 1)
 device = 'cuda'

@@ -4,19 +4,15 @@ import os
 import shutil
 
 wd = os.getcwd()
-dataset_dirname = "webis-webseg-20"
+dataset_dirname = "webis-webseg-20-combined"
+copy_target_dir = os.path.join(wd, "webis-webseg-20-edgecoarse")
+target_file_name = "screenshot-edges-coarse.png"
 if not os.path.isdir(os.path.join(wd, dataset_dirname)):
-    print("Cannot find the webis-webseg-20 dataset directory is the current directory: " + wd)
+    print("Cannot find the webis-webseg-20-combined dataset directory is the current directory: " + wd)
     exit(1)
-postfixes = ["screenshots",]
-for postfix in postfixes:
-    if not os.path.isdir(os.path.join(wd, dataset_dirname, dataset_dirname + "-" + postfix)):
-        print("missing the " + postfix + " directory! Please double check!")
-        exit(1)
 
-for dpid in os.scandir(os.path.join(wd, dataset_dirname, dataset_dirname + "-screenshots", dataset_dirname)):
+for dpid in os.scandir(os.path.join(wd, dataset_dirname)):
     if os.path.isdir(dpid):
-        for postfix in postfixes:
-            for content in os.scandir(
-                    os.path.join(wd, dataset_dirname, dataset_dirname + "-" + postfix, dataset_dirname, dpid.name)):
-                shutil.copy(content, os.path.join(dataset_dirname + "-screenshots", dpid.name+".png"))
+        for content in os.scandir(os.path.join(wd, dataset_dirname, dpid.name)):
+            if content.name == target_file_name:
+                shutil.copy(content, os.path.join(copy_target_dir, dpid.name + ".png"))

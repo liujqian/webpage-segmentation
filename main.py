@@ -6,7 +6,7 @@ import pickle
 from mmdet.apis import train_detector
 import os
 
-cfg = Config.fromfile('mmdet-configs /configs/htc/htc_x101_64x4d_fpn_16x1_20e_coco-copy.py')
+cfg = Config.fromfile('mmdet-configs/htc/htc_x101_64x4d_fpn_16x1_20e_coco-copy.py')
 # make changes to the base configuration based on the tutorial given on https://github.com/open-mmlab/mmdetection/blob/master/demo/MMDet_InstanceSeg_Tutorial.ipynb
 cfg.dataset_type = 'COCODataset'
 
@@ -28,10 +28,10 @@ for dictionary in cfg.model.roi_head.bbox_head:
 for dictionary in cfg.model.roi_head.mask_head:
     dictionary.num_classes = 1
 # We can still the pre-trained Mask RCNN model to obtain a higher performance
-cfg.load_from = '/home/liujqian/Documents/projects/page-segmentation/checkpoints/htc_x101_64x4d_fpn_16x1_20e_coco_20200318-b181fd7a.pth'
+cfg.load_from = '/home/liujqian/Documents/projects/page-segmentation/work_dir_third_try_full_screenshot/epoch_2.pth'
 
 # Set up working dir to save files and logs.
-cfg.work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir_second_try_full_screenshot'
+cfg.work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir_fourth_try_full_screenshot'
 
 # The original learning rate (LR) is set for 8-GPU training.
 # We divide it by 8 since we only use one GPU.
@@ -41,7 +41,7 @@ cfg.lr_config.warmup = None
 cfg.log_config.interval = 10
 cfg.data.samples_per_gpu = batch_size
 cfg.workers_per_gpu = batch_size
-
+cfg.runner.max_epochs = 8
 # We can set the evaluation interval to reduce the evaluation times
 cfg.evaluation.interval = 2
 # We can set the checkpoint saving interval to reduce the storage cost
@@ -62,18 +62,18 @@ cfg.log_config.hooks = [
     dict(type='TextLoggerHook'),
     dict(type='TensorboardLoggerHook')]
 print(f'Config:\n{cfg.pretty_text}')
-# Build dataset
-datasets = [build_dataset(cfg.data.train)]
-
-# Build the detector
-model = build_detector(cfg.model)
-
-# Add an attribute for visualization convenience
-model.CLASSES = datasets[0].CLASSES
-
-# Create work_dir
-mkdir_or_exist(os.path.abspath(cfg.work_dir))
-train_detector(model, datasets, cfg, distributed=False, validate=True)
-fh = open(os.path.join(cfg.work_dir, "final_model.pickle"), 'wb')
-pickle.dump(model, fh)
-fh.close()
+# # Build dataset
+# datasets = [build_dataset(cfg.data.train)]
+#
+# # Build the detector
+# model = build_detector(cfg.model)
+#
+# # Add an attribute for visualization convenience
+# model.CLASSES = datasets[0].CLASSES
+#
+# # Create work_dir
+# mkdir_or_exist(os.path.abspath(cfg.work_dir))
+# train_detector(model, datasets, cfg, distributed=False, validate=True)
+# fh = open(os.path.join(cfg.work_dir, "final_model.pickle"), 'wb')
+# pickle.dump(model, fh)
+# fh.close()
