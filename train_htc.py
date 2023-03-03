@@ -1,3 +1,10 @@
+# Acknowledgement:
+# This python script is used to make changes to the base configuration for my specific training goal.
+# After modifying the training configuration, it fine-tunes a model based on the modified configuration.
+# This script is based on the tutorials given by the mmdetection team. The original tutorial notebooks can be found at
+# https://github.com/open-mmlab/mmdetection/blob/master/demo/MMDet_InstanceSeg_Tutorial.ipynb
+# and
+# https://github.com/open-mmlab/mmdetection/blob/master/demo/MMDet_Tutorial.ipynb.
 from mmcv import Config, mkdir_or_exist
 from mmdet.apis import set_random_seed
 from mmdet.datasets import build_dataset
@@ -7,7 +14,7 @@ from mmdet.apis import train_detector
 import os
 
 cfg = Config.fromfile('mmdet-configs/htc/htc_x101_64x4d_fpn_16x1_20e_coco-copy.py')
-# make changes to the base configuration based on the tutorial given on https://github.com/open-mmlab/mmdetection/blob/master/demo/MMDet_InstanceSeg_Tutorial.ipynb
+
 cfg.dataset_type = 'COCODataset'
 
 cfg.data.test.ann_file = 'coco-formatted-info-val.json'
@@ -27,14 +34,12 @@ for dictionary in cfg.model.roi_head.bbox_head:
     dictionary.num_classes = 1
 for dictionary in cfg.model.roi_head.mask_head:
     dictionary.num_classes = 1
-# We can still the pre-trained Mask RCNN model to obtain a higher performance
+
 cfg.load_from = '/home/liujqian/Documents/projects/page-segmentation/checkpoints/htc_x101_64x4d_fpn_16x1_20e_coco_20200318-b181fd7a.pth'
 
 # Set up working dir to save files and logs.
 cfg.work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir_1_try_full_screenshot-edgecoarse'
 
-# The original learning rate (LR) is set for 8-GPU training.
-# We divide it by 8 since we only use one GPU.
 batch_size = 3
 cfg.optimizer.lr = (0.01 / 8) * batch_size
 cfg.lr_config.warmup = None
@@ -42,9 +47,9 @@ cfg.log_config.interval = 10
 cfg.data.samples_per_gpu = batch_size
 cfg.workers_per_gpu = batch_size
 cfg.runner.max_epochs = 20
-# We can set the evaluation interval to reduce the evaluation times
+
 cfg.evaluation.interval = 2
-# We can set the checkpoint saving interval to reduce the storage cost
+
 cfg.checkpoint_config.interval = 2
 
 # Set seed thus the results are more reproducible
@@ -53,6 +58,8 @@ set_random_seed(0, deterministic=False)
 cfg.gpu_ids = range(1)
 
 cfg.device = 'cuda'
+# Because we do not have semantic segmentation, remove the necessary fields configuring semantic segmentation.
+# See the discussion found at https://github.com/open-mmlab/mmdetection/issues/7683.
 cfg.model.roi_head.semantic_roi_extractor = None
 cfg.model.roi_head.semantic_head = None
 cfg.train_pipeline[-1]['keys'] = cfg.train_pipeline[-1]['keys'][0:4]
