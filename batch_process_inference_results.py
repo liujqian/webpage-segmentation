@@ -1,13 +1,75 @@
-import datetime
+import json
 import os
 import subprocess
 from math import ceil
 from multiprocessing import Process
 
+import pandas
+
+combined_csv_name = "combined-data.csv"
+calculated_avgs_file_name = "calculated_averages.json"
+
+
+def calculate_all_avgs(eval_dir: str):
+    for size_func in [
+        "pixels",
+        "edges-fine",
+        "edges-coarse",
+        "nodes",
+        "chars",
+    ]:
+        calculate_avgs(eval_dir=eval_dir, size_func=size_func)
+
+
+def calculate_avgs(eval_dir: str, size_func: str):
+    combined_csv_loc = os.path.join(eval_dir, size_func, combined_csv_name)
+    df = pandas.read_csv(combined_csv_loc)
+    stats = {
+        "avg_bcuded_f1": df["bcubed.f1"].mean(),
+        "avg_bcuded_recall": df["bcubed.recall"].mean(),
+        "avg_bcuded_precision": df["bcubed.precision"].mean(),
+        "avg_bcuded_f1star": 2.0 * df["bcubed.recall"].mean() * df["bcubed.precision"].mean() / (
+                df["bcubed.recall"].mean() + df["bcubed.precision"].mean())
+    }
+    with open(os.path.join(os.path.join(eval_dir, size_func), calculated_avgs_file_name), "w") as handle:
+        json.dump(stats, handle, indent=6)
+
+
+def combine_all_csvs(eval_dir: str):
+    for size_func in [
+        "pixels",
+        "edges-fine",
+        "edges-coarse",
+        "nodes",
+        "chars",
+    ]:
+        combine_csvs(eval_dir=eval_dir, size_func=size_func)
+
+
+def combine_csvs(eval_dir: str, size_func: str):
+    target_dir = os.path.join(eval_dir, size_func)
+    file_names = [d.name for d in os.scandir(target_dir) if
+                  d.name.split(".")[-1] in {"json", "csv"}]
+    header_line = '"","bcubed.precision","bcubed.recall","bcubed.f1"\n'
+    combined_data = ""
+    for file_name in file_names:
+        full_name = os.path.join(target_dir, file_name)
+        with open(full_name, "r") as handle:
+            cur_header_line = handle.readline()
+            assert cur_header_line == header_line, f"Noticing a different header-line:\n{cur_header_line}"
+            cur_data_line = handle.readline()
+            assert cur_data_line != "", \
+                f"Seeing an empty data line. size_function is {size_func}, file name is {full_name}"
+            combined_data += cur_data_line
+            assert handle.readline() == '', \
+                f"Seeing a file with more than one data line. size_function is {size_func}, file name is {full_name}"
+    with open(os.path.join(target_dir, combined_csv_name), "w") as handle:
+        handle.write(header_line + combined_data)
+
 
 def single_evaluation(
         flattened_inferences_dir: str,
-        outputs_dir: str,
+        outputs_dir: str,  # Assume this directory is already specific to a size function.
         img_id: str,
         combined_dataset_dir: str = "webis-webseg-20-combined",
         evaluation_script_loc: str = "cikm20/src/main/r/evaluate-segmentation.R",
@@ -19,7 +81,7 @@ def single_evaluation(
         "Rscript", evaluation_script_loc,
         "--algorithm", os.path.join(flattened_inferences_dir, f"{img_id}.json"),
         "--ground-truth", os.path.join(combined_dataset_dir, img_id, "ground-truth.json"),
-        '--output', os.path.join(outputs_dir, f"{img_id}.json"),
+        '--output', os.path.join(outputs_dir, f"{img_id}.csv"),
         "--size-function", size_function
     ]
     subprocess.check_call(args=args, cwd=os.getcwd())
@@ -49,24 +111,32 @@ def batch_evaluations(
         outputs_dir: str,
         combined_dataset_dir: str = "webis-webseg-20-combined",
         evaluation_script_loc: str = "cikm20/src/main/r/evaluate-segmentation.R",
-        size_function: str = "pixels"
 ):
     ids = extract_image_ids(flattened_inferences_dir)
-    processes = []
-    for i, img_id in enumerate(ids):
-        p = Process(
-            target=single_evaluation,
-            args=(
-                flattened_inferences_dir,
-                outputs_dir,
-                img_id,
-                combined_dataset_dir,
-                evaluation_script_loc,
-                size_function
-            ),
-        )
-        processes.append(p)
-    start_and_join_processes(processes=processes)
+
+    for size_func in [
+        "pixels",
+        "edges-fine",
+        "edges-coarse",
+        "nodes",
+        "chars",
+    ]:
+        processes = []
+        os.mkdir((outputs_dir + "/" + size_func), mode=0o777)
+        for i, img_id in enumerate(ids):
+            p = Process(
+                target=single_evaluation,
+                args=(
+                    flattened_inferences_dir,
+                    os.path.join(outputs_dir, size_func),
+                    img_id,
+                    combined_dataset_dir,
+                    evaluation_script_loc,
+                    size_func
+                ),
+            )
+            processes.append(p)
+        start_and_join_processes(processes=processes)
 
 
 def batch_flatten_segments(
@@ -173,7 +243,9 @@ if __name__ == '__main__':
     #     fitted_inferences_dir="htc/inference_out/screenshot/dom_node_fitted_annotations",
     #     outputs_dir="htc/inference_out/screenshot/flattened_annotations",
     # )
-    batch_evaluations(
-        flattened_inferences_dir="htc/inference_out/screenshot/flattened_annotations",
-        outputs_dir="htc/inference_out/screenshot/evalutions",
-    )
+    # batch_evaluations(
+    #     flattened_inferences_dir="htc/inference_out/screenshot/flattened_annotations",
+    #     outputs_dir="htc/inference_out/screenshot/evaluations",
+    # )
+    # combine_all_csvs(eval_dir="htc/inference_out/screenshot/evaluations")
+    calculate_all_avgs(eval_dir="htc/inference_out/screenshot/evaluations")
