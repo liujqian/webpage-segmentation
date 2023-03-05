@@ -17,16 +17,16 @@ cfg = Config.fromfile('mmdet-configs/htc/htc_x101_64x4d_fpn_16x1_20e_coco-copy.p
 
 cfg.dataset_type = 'COCODataset'
 
-cfg.data.test.ann_file = 'coco-formatted-info-val.json'
-cfg.data.test.img_prefix = 'webis-webseg-20-edgecoarse/'
+cfg.data.test.ann_file = 'coco-formatted-info-test.json'
+cfg.data.test.img_prefix = 'webis-webseg-20-screenshots/'
 cfg.data.test.classes = ('webpage-segmentation',)
 
 cfg.data.train.ann_file = 'coco-formatted-info-train.json'
-cfg.data.train.img_prefix = 'webis-webseg-20-edgecoarse/'
+cfg.data.train.img_prefix = 'webis-webseg-20-screenshots/'
 cfg.data.train.classes = ('webpage-segmentation',)
 
 cfg.data.val.ann_file = 'coco-formatted-info-val.json'
-cfg.data.val.img_prefix = 'webis-webseg-20-edgecoarse/'
+cfg.data.val.img_prefix = 'webis-webseg-20-screenshots/'
 cfg.data.val.classes = ('webpage-segmentation',)
 
 # modify num classes of the model in box head and mask head
@@ -38,7 +38,7 @@ for dictionary in cfg.model.roi_head.mask_head:
 cfg.load_from = '/home/liujqian/Documents/projects/page-segmentation/checkpoints/htc_x101_64x4d_fpn_16x1_20e_coco_20200318-b181fd7a.pth'
 
 # Set up working dir to save files and logs.
-cfg.work_dir = '/home/liujqian/Documents/projects/page-segmentation/work_dir_1_try_full_screenshot-edgecoarse'
+cfg.work_dir = '/home/liujqian/Documents/projects/page-segmentation/htc/screenshots-batchsize3-rerun'
 
 batch_size = 3
 cfg.optimizer.lr = (0.01 / 8) * batch_size

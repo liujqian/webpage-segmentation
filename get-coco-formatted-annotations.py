@@ -4,7 +4,7 @@ import os.path
 
 import mmcv
 
-dataset_dirname = "webis-webseg-20"
+dataset_dirname = "webis-webseg-20-combined"
 ground_truth_dir_name = "webis-webseg-20-ground-truth"
 annotation_file_name = "ground-truth.json"
 polygons_with_holes = []
@@ -43,7 +43,7 @@ categories = [{
 
 
 def get_annotations_of_image(img_id: str, next_annotation_id: int) -> (dict, list):
-    filepath = os.path.join(dataset_dirname, ground_truth_dir_name, img_id, annotation_file_name)
+    filepath = os.path.join(dataset_dirname,  img_id, annotation_file_name)
     data = mmcv.load(filepath, file_format="json")
     image = {"id": int(img_id), "width": data["width"], "height": data["height"], "file_name": img_id + '.png'}
     segs = data["segmentations"]
@@ -86,16 +86,21 @@ categories = [
 ]
 coco_formatted_info_train = {"categories": categories, "images": [], "annotations": []}
 coco_formatted_info_val = {"categories": categories, "images": [], "annotations": []}
+coco_formatted_info_test = {"categories": categories, "images": [], "annotations": []}
 next_annotation_id = 0
-for folder in os.scandir(os.path.join(dataset_dirname, ground_truth_dir_name)):
+for folder in os.scandir(os.path.join(dataset_dirname)):
     folder_name = folder.name
     img_info, annotations = get_annotations_of_image(folder_name, next_annotation_id)
     next_annotation_id += len(annotations)
     if int(folder_name) > 8999:
-        coco_formatted_info = coco_formatted_info_val
+        if int(folder_name) > 9487:
+            coco_formatted_info = coco_formatted_info_test
+        else:
+            coco_formatted_info = coco_formatted_info_val
     else:
         coco_formatted_info = coco_formatted_info_train
     coco_formatted_info["images"].append(img_info)
     coco_formatted_info["annotations"].extend(annotations)
 mmcv.dump(coco_formatted_info_train, "coco-formatted-info-train.json", "json")
 mmcv.dump(coco_formatted_info_val, "coco-formatted-info-val.json", "json")
+mmcv.dump(coco_formatted_info_val, "coco-formatted-info-test.json", "json")
