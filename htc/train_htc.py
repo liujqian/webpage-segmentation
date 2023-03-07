@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # Set up working dir to save files and logs.
     cfg.work_dir = 'screenshots-batchsize3-rerun'
 
-    batch_size = 1
+    batch_size = 3
     cfg.optimizer.lr = (0.01 / 8) * batch_size
     cfg.lr_config.warmup = None
     cfg.log_config.interval = 10

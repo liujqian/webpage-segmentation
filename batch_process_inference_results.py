@@ -3,6 +3,7 @@ import os
 import subprocess
 from math import ceil
 from multiprocessing import Process
+from pathlib import Path
 
 import pandas
 
@@ -71,6 +72,7 @@ def single_evaluation(
         flattened_inferences_dir: str,
         outputs_dir: str,  # Assume this directory is already specific to a size function.
         img_id: str,
+        algorithm_segmentation: str,
         combined_dataset_dir: str = "webis-webseg-20-combined",
         evaluation_script_loc: str = "cikm20/src/main/r/evaluate-segmentation.R",
         size_function: str = "pixels"
@@ -79,6 +81,7 @@ def single_evaluation(
         'size_function should be one of ["pixels", "edges-fine", "edges-coarse", "nodes", "chars"]'
     args = [
         "Rscript", evaluation_script_loc,
+        "--algorithm-segmentation", algorithm_segmentation,
         "--algorithm", os.path.join(flattened_inferences_dir, f"{img_id}.json"),
         "--ground-truth", os.path.join(combined_dataset_dir, img_id, "ground-truth.json"),
         '--output', os.path.join(outputs_dir, f"{img_id}.csv"),
@@ -109,6 +112,7 @@ def extract_image_ids(target_dir: str) -> list[str]:
 def batch_evaluations(
         flattened_inferences_dir: str,
         outputs_dir: str,
+        algorithm_segmentation: str,
         combined_dataset_dir: str = "webis-webseg-20-combined",
         evaluation_script_loc: str = "cikm20/src/main/r/evaluate-segmentation.R",
 ):
@@ -122,7 +126,7 @@ def batch_evaluations(
         "chars",
     ]:
         processes = []
-        os.mkdir((outputs_dir + "/" + size_func), mode=0o777)
+        Path(outputs_dir + "/" + size_func).mkdir(parents=True, exist_ok=True)
         for i, img_id in enumerate(ids):
             p = Process(
                 target=single_evaluation,
@@ -130,6 +134,7 @@ def batch_evaluations(
                     flattened_inferences_dir,
                     os.path.join(outputs_dir, size_func),
                     img_id,
+                    algorithm_segmentation,
                     combined_dataset_dir,
                     evaluation_script_loc,
                     size_func
@@ -144,6 +149,7 @@ def batch_flatten_segments(
         outputs_dir: str,
         flatten_script_loc: str = "cikm20/src/main/r/flatten-segmentations.R"
 ):
+    Path(outputs_dir).mkdir(parents=True, exist_ok=True)
     ids = extract_image_ids(fitted_inferences_dir)
     processes = []
     for i, img_id in enumerate(ids):
@@ -164,8 +170,8 @@ def single_fit_segments(
         raw_inferences_dir: str,
         outputs_dir: str,
         img_id: str,
+        segmentations_name: str,
         combined_dataset_dir: str = "webis-webseg-20-combined",
-        segmentations_name: str = "mmdetection_bboxes",
         fit_script_loc: str = "cikm20/src/main/r/fit-segmentations-to-dom-nodes.R",
 ):
     args = [
@@ -181,10 +187,12 @@ def single_fit_segments(
 def batch_fit_segments(
         raw_inferences_dir: str,
         outputs_dir: str,
+
+        segmentations_name: str,
         combined_dataset_dir: str = "webis-webseg-20-combined",
-        segmentations_name: str = "mmdetection_bboxes",
         fit_script_loc: str = "cikm20/src/main/r/fit-segmentations-to-dom-nodes.R",
 ):
+    Path(outputs_dir).mkdir(parents=True, exist_ok=True)
     ids = extract_image_ids(raw_inferences_dir)
     processes = []
     for i, img_id in enumerate(ids):
@@ -230,22 +238,27 @@ def batch_replace(target_dir: str, original: str, new: str):
 
 
 if __name__ == '__main__':
-    # batch_fit_segments(
-    #     raw_inferences_dir="htc/inference_out/screenshot/original_inferences",
-    #     ouputs_dir="htc/inference_out/screenshot/dom_node_fitted_annotations",
-    # )
-    # batch_replace(
-    #     target_dir="htc/inference_out/screenshot/dom_node_fitted_annotations",
-    #     original="mmdetection_bboxes.fitted",
-    #     new="mmdetection"
-    # )
-    # batch_flatten_segments(
-    #     fitted_inferences_dir="htc/inference_out/screenshot/dom_node_fitted_annotations",
-    #     outputs_dir="htc/inference_out/screenshot/flattened_annotations",
-    # )
-    # batch_evaluations(
-    #     flattened_inferences_dir="htc/inference_out/screenshot/flattened_annotations",
-    #     outputs_dir="htc/inference_out/screenshot/evaluations",
-    # )
-    # combine_all_csvs(eval_dir="htc/inference_out/screenshot/evaluations")
-    calculate_all_avgs(eval_dir="htc/inference_out/screenshot/evaluations")
+    algorithm = "htc"
+    train_target_type = "screenshot"
+    node_fit_segmentation_name = "mmdetection_bboxes"
+    batch_fit_segments(
+        raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",
+        outputs_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
+        segmentations_name=node_fit_segmentation_name
+    )
+    batch_replace(
+        target_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
+        original=f"{node_fit_segmentation_name}.fitted",
+        new="generated_segmentation"
+    )
+    batch_flatten_segments(
+        fitted_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
+        outputs_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
+    )
+    batch_evaluations(
+        flattened_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
+        outputs_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations",
+        algorithm_segmentation="generated_segmentation"
+    )
+    combine_all_csvs(eval_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations")
+    calculate_all_avgs(eval_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations")
