@@ -49,10 +49,10 @@ lock = Lock()
 
 
 def infer(model, imgfile, id, train_target_type):
-    id = str(id)
+    img_id = id
     target_dir = os.path.join("inference_out", train_target_type, "original_inferences")
     Path(target_dir).mkdir(parents=True, exist_ok=True)
-    target_file = os.path.join(target_dir, id + ".json")
+    target_file = os.path.join(target_dir, img_id + ".json")
     img = mmcv.imread(imgfile)
 
     lock.acquire()
@@ -97,7 +97,7 @@ def infer(model, imgfile, id, train_target_type):
     out_obj = dict(
         height=img.shape[0],
         width=img.shape[1],
-        id=id,
+        id=img_id,
         segmentations=dict(
             mmdetection_bboxes=bbox_polygon_list,
             mmdetection_segms=segm_polygon_list
@@ -110,13 +110,13 @@ def infer(model, imgfile, id, train_target_type):
 checkpoint_file_trained = 'screenshot-batchsize3/work_dir_fourth_try_full_screenshot/epoch_6.pth'
 if __name__ == '__main__':
     train_target_type = "screenshot"
-    combined_dataset_loc = "../webis-webseg-20-combined"
+    inference_target_dir = "webis-webseg-20-screenshots"
 
-    directory = os.fsencode(combined_dataset_loc)
+    directory = os.fsencode(inference_target_dir)
     config_file_trained = 'customized-configs/htc_x101_64x4d_fpn_16x1_20e_coco_customized.py'
-    model = init_detector(config_file_trained, checkpoint_file_trained, device='cuda:0')
+    model = init_detector(config_file_trained, checkpoint_file_trained, device='cpu')
 
-    ids = [d.name for d in os.scandir(directory) if d.is_dir() and int(d.name) > 9487]
+    ids = [d.name for d in os.scandir(directory) if int(d.name.split(".")[0]) > 9487]
 
     for i in range(len(ids)):
         if i % 50 == 0:
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
         infer(
             model,
-            os.path.join(combined_dataset_loc, img_id.decode("utf-8"), f"{train_target_type}.png"),
-            img_id.decode("utf-8"),
+            os.path.join(inference_target_dir, img_id, f"{img_id}.png"),
+            img_id,
             train_target_type=train_target_type
         )

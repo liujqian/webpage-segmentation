@@ -99,9 +99,9 @@ class Predictor(object):
 
 
 if __name__ == '__main__':
-    ckpt_file = "checkpoints/epoch_92_ckpt.pth"
+    ckpt_file = "checkpoints/edges_coarse_best_ckpt.pth"
     exp_file = "exps/webis_webseg_yolox_l.py"
-    train_target_type = "screenshots"
+    train_target_type = "screenshots-edges-coarse"
     inference_target_dir = f"webis-webseg-20-{train_target_type}"
 
     exp = get_exp(exp_file=exp_file)
@@ -118,8 +118,8 @@ if __name__ == '__main__':
         model, exp, ("webpage-segmentation",), trt_file=None, decoder=None,
         device="cpu", fp16=False, legacy=False,
     )
-    target_dir = os.path.join("inference_out", train_target_type, "original_inferences")
-    Path(target_dir).mkdir(parents=True, exist_ok=True)
+    results_target_dir = os.path.join("inference_out", train_target_type, "original_inferences")
+    Path(results_target_dir).mkdir(parents=True, exist_ok=True)
     ids = [d.name.split(".")[0] for d in os.scandir(inference_target_dir) if int(d.name.split(".")[0]) > 9487]
     for i in range(len(ids)):
         bbox_polygon_list = []
@@ -174,5 +174,5 @@ if __name__ == '__main__':
                 yolox_bboxes=bbox_polygon_list,
             ),
         )
-        with open(os.path.join(target_dir, img_id + ".json"), 'w') as outfile:
+        with open(os.path.join(results_target_dir, img_id + ".json"), 'w') as outfile:
             json.dump(out_obj, outfile)
