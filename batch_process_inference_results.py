@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import subprocess
 from math import ceil
 from multiprocessing import Process
@@ -9,6 +10,7 @@ import pandas
 
 combined_csv_name = "combined-data.csv"
 calculated_avgs_file_name = "calculated_averages.json"
+r_executable = "C:\\Program Files\\R\\R-4.2.2\\bin\\x64\\Rscript.exe" if platform.system() == 'Windows' else "Rscript"
 
 
 def calculate_all_avgs(eval_dir: str):
@@ -80,7 +82,7 @@ def single_evaluation(
     assert size_function in ["pixels", "edges-fine", "edges-coarse", "nodes", "chars"], \
         'size_function should be one of ["pixels", "edges-fine", "edges-coarse", "nodes", "chars"]'
     args = [
-        "Rscript", evaluation_script_loc,
+        r_executable, evaluation_script_loc,
         "--algorithm-segmentation", algorithm_segmentation,
         "--algorithm", os.path.join(flattened_inferences_dir, f"{img_id}.json"),
         "--ground-truth", os.path.join(combined_dataset_dir, img_id, "ground-truth.json"),
@@ -97,7 +99,7 @@ def single_flatten_segments(
         flatten_script_loc: str = "cikm20/src/main/r/flatten-segmentations.R"
 ):
     args = [
-        "Rscript", flatten_script_loc,
+        r_executable, flatten_script_loc,
         "--input", os.path.join(fitted_inferences_dir, f"{img_id}.json"),
         '--output', os.path.join(outputs_dir, f"{img_id}.json")
     ]
@@ -125,6 +127,7 @@ def batch_evaluations(
         "nodes",
         "chars",
     ]:
+        print("Evaluating on " + size_func)
         processes = []
         Path(outputs_dir + "/" + size_func).mkdir(parents=True, exist_ok=True)
         for i, img_id in enumerate(ids):
@@ -175,7 +178,7 @@ def single_fit_segments(
         fit_script_loc: str = "cikm20/src/main/r/fit-segmentations-to-dom-nodes.R",
 ):
     args = [
-        "Rscript", fit_script_loc,
+        r_executable, fit_script_loc,
         "--input", os.path.join(raw_inferences_dir, f"{img_id}.json"),
         "--segmentations", segmentations_name,
         '--nodes', os.path.join(combined_dataset_dir, img_id, "nodes.csv"),
@@ -187,7 +190,6 @@ def single_fit_segments(
 def batch_fit_segments(
         raw_inferences_dir: str,
         outputs_dir: str,
-
         segmentations_name: str,
         combined_dataset_dir: str = "webis-webseg-20-combined",
         fit_script_loc: str = "cikm20/src/main/r/fit-segmentations-to-dom-nodes.R",
@@ -202,8 +204,8 @@ def batch_fit_segments(
                 raw_inferences_dir,
                 outputs_dir,
                 img_id,
-                combined_dataset_dir,
                 segmentations_name,
+                combined_dataset_dir,
                 fit_script_loc,
             ),
         )
@@ -239,26 +241,32 @@ def batch_replace(target_dir: str, original: str, new: str):
 
 if __name__ == '__main__':
     algorithm = "htc"
-    train_target_type = "screenshot"
-    node_fit_segmentation_name = "mmdetection_bboxes"
+    train_target_type = "screenshots"
+    node_fit_segmentation_name = "mmdetection_segms"
+    print("Fitting segmentations.")
     batch_fit_segments(
         raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",
         outputs_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
-        segmentations_name=node_fit_segmentation_name
+        segmentations_name=node_fit_segmentation_name,
     )
+    print("Replacing segmentation names.")
     batch_replace(
         target_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
         original=f"{node_fit_segmentation_name}.fitted",
         new="generated_segmentation"
     )
+    print("Flattening segmentations.")
     batch_flatten_segments(
         fitted_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
         outputs_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
     )
+    print("Evaluating segmentations")
     batch_evaluations(
         flattened_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
         outputs_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations",
         algorithm_segmentation="generated_segmentation"
     )
+    print("Combining CSVs")
     combine_all_csvs(eval_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations")
+    print("Calculating average statistics.")
     calculate_all_avgs(eval_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations")
