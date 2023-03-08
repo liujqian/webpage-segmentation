@@ -102,6 +102,7 @@ if __name__ == '__main__':
     ckpt_file = "checkpoints/epoch_92_ckpt.pth"
     exp_file = "exps/webis_webseg_yolox_l.py"
     train_target_type = "screenshots"
+    inference_target_dir = f"webis-webseg-20-{train_target_type}"
 
     exp = get_exp(exp_file=exp_file)
     experiment_name = exp.exp_name
@@ -119,14 +120,13 @@ if __name__ == '__main__':
     )
     target_dir = os.path.join("inference_out", train_target_type, "original_inferences")
     Path(target_dir).mkdir(parents=True, exist_ok=True)
-    directory = f"webis-webseg-20-{train_target_type}"
-    ids = [d.name.split(".")[0] for d in os.scandir(directory) if int(d.name.split(".")[0]) > 9487]
+    ids = [d.name.split(".")[0] for d in os.scandir(inference_target_dir) if int(d.name.split(".")[0]) > 9487]
     for i in range(len(ids)):
         bbox_polygon_list = []
         if i % 50 == 0:
             print(f"Making inference for the {i}th data point. There are {len(ids)} data points in total!")
         img_id = ids[i]
-        img_file_name = os.path.join(directory, img_id + ".png")
+        img_file_name = os.path.join(inference_target_dir, img_id + ".png")
         outputs, img_info = predictor.inference(img_file_name)
         ratio = img_info["ratio"]
         bboxes = outputs[0][:, 0:4]
