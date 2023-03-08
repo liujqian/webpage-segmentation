@@ -109,7 +109,9 @@ def infer(model, imgfile, id, train_target_type):
 
 checkpoint_file_trained = 'screenshot-batchsize3/work_dir_fourth_try_full_screenshot/epoch_6.pth'
 if __name__ == '__main__':
+    train_target_type = "screenshot"
     combined_dataset_loc = "../webis-webseg-20-combined"
+
     directory = os.fsencode(combined_dataset_loc)
     config_file_trained = 'customized-configs/htc_x101_64x4d_fpn_16x1_20e_coco_customized.py'
     model = init_detector(config_file_trained, checkpoint_file_trained, device='cuda:0')
@@ -120,10 +122,10 @@ if __name__ == '__main__':
         if i % 50 == 0:
             print(f"Making inference for the {i}th data point. There are {len(ids)} data points in total!")
         img_id = ids[i]
-        train_target_type = checkpoint_file_trained.split("-")[0]
+
         infer(
             model,
-            os.path.join(combined_dataset_loc, img_id.decode("utf-8"), "screenshot.png"),
+            os.path.join(combined_dataset_loc, img_id.decode("utf-8"), f"{train_target_type}.png"),
             img_id.decode("utf-8"),
             train_target_type=train_target_type
         )
