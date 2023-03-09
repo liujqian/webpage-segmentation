@@ -112,7 +112,7 @@ def infer(model, imgfile, id, train_target_type):
 checkpoint_file_trained = 'checkpoints/edge-fine-epoch6/epoch_6.pth'
 if __name__ == '__main__':
     train_target_type = "edges-fine"
-    inference_target_dir = "webis-webseg-20-screenshots-edges-fine"
+    inference_target_dir = "../yolox/webis-webseg-20-screenshots-edges-fine"
 
     directory = inference_target_dir
     config_file_trained = 'customized-configs/htc_x101_64x4d_fpn_16x1_20e_coco_customized.py'

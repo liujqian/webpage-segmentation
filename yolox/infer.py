@@ -99,9 +99,9 @@ class Predictor(object):
 
 
 if __name__ == '__main__':
-    ckpt_file = "checkpoints/edges_coarse_best_ckpt.pth"
+    ckpt_file = "checkpoints/edges_fine_best_ckpt.pth"
     exp_file = "exps/webis_webseg_yolox_l.py"
-    train_target_type = "screenshots-edges-coarse"
+    train_target_type = "screenshots-edges-fine"
     inference_target_dir = f"webis-webseg-20-{train_target_type}"
 
     exp = get_exp(exp_file=exp_file)
