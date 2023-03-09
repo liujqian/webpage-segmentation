@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import shutil
 import subprocess
 from math import ceil
 from multiprocessing import Process
@@ -11,6 +12,7 @@ import pandas
 combined_csv_name = "combined-data.csv"
 calculated_avgs_file_name = "calculated_averages.json"
 r_executable = "C:\\Program Files\\R\\R-4.2.2\\bin\\x64\\Rscript.exe" if platform.system() == 'Windows' else "Rscript"
+replaced_segmentation_name = "generated_segmentation"
 
 
 def calculate_all_avgs(eval_dir: str):
@@ -98,6 +100,14 @@ def single_flatten_segments(
         img_id: str,
         flatten_script_loc: str = "cikm20/src/main/r/flatten-segmentations.R"
 ):
+    with open(os.path.join(fitted_inferences_dir, f"{img_id}.json")) as handle:
+        m = json.load(handle)
+        if len(m["segmentations"][replaced_segmentation_name]) == 0:
+            shutil.copy(
+                os.path.join(fitted_inferences_dir, f"{img_id}.json"),
+                os.path.join(outputs_dir, f"{img_id}.json")
+            )
+            return
     args = [
         r_executable, flatten_script_loc,
         "--input", os.path.join(fitted_inferences_dir, f"{img_id}.json"),
@@ -242,7 +252,7 @@ def batch_replace(target_dir: str, original: str, new: str):
 if __name__ == '__main__':
     algorithm = "htc"
     node_fit_segmentation_name = "mmdetection_segms"
-    train_target_type = "edges-fine"
+    train_target_type = "untrained-screenshots"
     print("Fitting segmentations.")
     batch_fit_segments(
         raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",
@@ -253,7 +263,7 @@ if __name__ == '__main__':
     batch_replace(
         target_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
         original=f"{node_fit_segmentation_name}.fitted",
-        new="generated_segmentation"
+        new=replaced_segmentation_name
     )
     print("Flattening segmentations.")
     batch_flatten_segments(
@@ -264,7 +274,7 @@ if __name__ == '__main__':
     batch_evaluations(
         flattened_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
         outputs_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations",
-        algorithm_segmentation="generated_segmentation"
+        algorithm_segmentation=replaced_segmentation_name
     )
     print("Combining CSVs")
     combine_all_csvs(eval_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations")
