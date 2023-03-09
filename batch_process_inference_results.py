@@ -241,8 +241,8 @@ def batch_replace(target_dir: str, original: str, new: str):
 
 if __name__ == '__main__':
     algorithm = "htc"
-    train_target_type = "screenshots"
     node_fit_segmentation_name = "mmdetection_segms"
+    train_target_type = "edges-fine"
     print("Fitting segmentations.")
     batch_fit_segments(
         raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",
