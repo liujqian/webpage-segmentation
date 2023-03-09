@@ -89,7 +89,8 @@ def single_evaluation(
         "--algorithm", os.path.join(flattened_inferences_dir, f"{img_id}.json"),
         "--ground-truth", os.path.join(combined_dataset_dir, img_id, "ground-truth.json"),
         '--output', os.path.join(outputs_dir, f"{img_id}.csv"),
-        "--size-function", size_function
+        "--size-function", size_function,
+        "--default-segmentation"
     ]
     subprocess.check_call(args=args, cwd=os.getcwd())
 
@@ -253,29 +254,29 @@ if __name__ == '__main__':
     algorithm = "htc"
     node_fit_segmentation_name = "mmdetection_segms"
     train_target_type = "untrained-screenshots"
-    print("Fitting segmentations.")
-    batch_fit_segments(
-        raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",
-        outputs_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
-        segmentations_name=node_fit_segmentation_name,
-    )
-    print("Replacing segmentation names.")
-    batch_replace(
-        target_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
-        original=f"{node_fit_segmentation_name}.fitted",
-        new=replaced_segmentation_name
-    )
-    print("Flattening segmentations.")
-    batch_flatten_segments(
-        fitted_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
-        outputs_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
-    )
-    print("Evaluating segmentations")
-    batch_evaluations(
-        flattened_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
-        outputs_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations",
-        algorithm_segmentation=replaced_segmentation_name
-    )
+    # print("Fitting segmentations.")
+    # batch_fit_segments(
+    #     raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",
+    #     outputs_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
+    #     segmentations_name=node_fit_segmentation_name,
+    # )
+    # print("Replacing segmentation names.")
+    # batch_replace(
+    #     target_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
+    #     original=f"{node_fit_segmentation_name}.fitted",
+    #     new=replaced_segmentation_name
+    # )
+    # print("Flattening segmentations.")
+    # batch_flatten_segments(
+    #     fitted_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/dom_node_fitted_annotations",
+    #     outputs_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
+    # )
+    # print("Evaluating segmentations")
+    # batch_evaluations(
+    #     flattened_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/flattened_annotations",
+    #     outputs_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations",
+    #     algorithm_segmentation=replaced_segmentation_name
+    # )
     print("Combining CSVs")
     combine_all_csvs(eval_dir=f"{algorithm}/inference_out/{train_target_type}/evaluations")
     print("Calculating average statistics.")
