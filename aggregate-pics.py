@@ -6,10 +6,10 @@ from pathlib import Path
 
 if __name__ == '__main__':
     wd = os.getcwd()
-    enclosing_dir = "webis-webseg-20-separated/webis-webseg-20-screenshots-edges/webis-webseg-20"
-    copy_target_dir = os.path.join(wd, "webis-webseg-20-screenshots-edges-coarse")
+    enclosing_dir = "webis-webseg-20-combined"
+    copy_target_dir = os.path.join(wd, "webis-webseg-20-edgesfine")
     Path(copy_target_dir).mkdir(parents=True, exist_ok=True)
-    target_file_name = "screenshot-edges-coarse.png"
+    target_file_name = "screenshot-edges-fine.png"
     if not os.path.isdir(os.path.join(wd, enclosing_dir)):
         print("Cannot find the webis-webseg-20 dataset directory is the current directory: " + wd)
         exit(1)
