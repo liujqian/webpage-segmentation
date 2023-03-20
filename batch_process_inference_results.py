@@ -251,10 +251,9 @@ def batch_replace(target_dir: str, original: str, new: str):
 
 
 if __name__ == '__main__':
-    algorithm = "yolox"
-    node_fit_segmentation_name = "yolox_bboxes"
-    # train_target_type = "untrained-screenshots"
-    for train_target_type in ["screenshots", "screenshots-edges-coarse", "screenshots-edges-fine"]:
+    algorithm = "faster-rcnn/customized-faster-rcnn"
+    node_fit_segmentation_name = "mmdetection_bboxes"
+    for train_target_type in ["screenshots-increased-anchors", ]:
         print("Fitting segmentations.")
         batch_fit_segments(
             raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",
