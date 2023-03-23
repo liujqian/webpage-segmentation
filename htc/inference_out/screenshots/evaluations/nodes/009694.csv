@@ -1,2 +1,2 @@
 "","bcubed.precision","bcubed.recall","bcubed.f1"
-"majority-vote",1,0.730146148632636,0.844028291147176
+"majority-vote",0.9921913277805,0.736121567602365,0.845186583422971

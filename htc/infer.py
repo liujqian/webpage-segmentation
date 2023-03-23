@@ -49,6 +49,7 @@ lock = Lock()
 
 
 def infer(model, imgfile, id, train_target_type):
+    confidence_thr = 0.1
     img_id = id
     target_dir = os.path.join("inference_out", train_target_type, "original_inferences")
     Path(target_dir).mkdir(parents=True, exist_ok=True)
@@ -70,7 +71,7 @@ def infer(model, imgfile, id, train_target_type):
 
     if segm_result is not None:
         segms = mmcv.concat_list(segm_result)
-        inds = np.where(bboxes[:, -1] > 0.07)[0]
+        inds = np.where(bboxes[:, -1] > confidence_thr)[0]
         for i in inds:
             mask = segms[i]
             try:
@@ -84,7 +85,7 @@ def infer(model, imgfile, id, train_target_type):
                 print()
 
     for bbox in bboxes:
-        if bbox[4] < 0.07:
+        if bbox[4] < confidence_thr:
             continue
         bbox_int = bbox.astype(np.int32)
         left = bbox_int[0]
@@ -109,25 +110,26 @@ def infer(model, imgfile, id, train_target_type):
         json.dump(out_obj, outfile)
 
 
-checkpoint_file_trained = 'checkpoints/edge-fine-epoch6/epoch_6.pth'
 if __name__ == '__main__':
-    train_target_type = "edges-fine"
-    inference_target_dir = "../yolox/webis-webseg-20-screenshots-edges-fine"
+    for train_target_type in [
+        # "screenshots",
+        "screenshots-edges-coarse", "screenshots-edges-fine"]:
+        inference_target_dir = f"webis-webseg-20-{train_target_type}"
+        checkpoint_file_trained = f'checkpoints/{train_target_type}-epoch6/epoch_6.pth'
+        directory = inference_target_dir
+        config_file_trained = 'customized-configs/htc_x101_64x4d_fpn_16x1_20e_coco_customized.py'
+        model = init_detector(config_file_trained, checkpoint_file_trained, device='cpu')
 
-    directory = inference_target_dir
-    config_file_trained = 'customized-configs/htc_x101_64x4d_fpn_16x1_20e_coco_customized.py'
-    model = init_detector(config_file_trained, checkpoint_file_trained, device='cpu')
+        ids = [d.name for d in os.scandir(directory) if int(d.name.split(".")[0]) > 9487]
 
-    ids = [d.name for d in os.scandir(directory) if int(d.name.split(".")[0]) > 9487]
+        for i in range(len(ids)):
+            if i % 50 == 0:
+                print(f"Making inference for the {i}th data point. There are {len(ids)} data points in total!")
+            img_id = ids[i].split(".")[0]
 
-    for i in range(len(ids)):
-        if i % 50 == 0:
-            print(f"Making inference for the {i}th data point. There are {len(ids)} data points in total!")
-        img_id = ids[i].split(".")[0]
-
-        infer(
-            model,
-            os.path.join(inference_target_dir, f"{img_id}.png"),
-            img_id,
-            train_target_type=train_target_type
-        )
+            infer(
+                model,
+                os.path.join(inference_target_dir, f"{img_id}.png"),
+                img_id,
+                train_target_type=train_target_type
+            )
