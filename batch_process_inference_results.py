@@ -61,7 +61,7 @@ def combine_csvs(eval_dir: str, size_func: str):
         full_name = os.path.join(target_dir, file_name)
         with open(full_name, "r") as handle:
             cur_header_line = handle.readline()
-            assert cur_header_line == header_line, f"Noticing a different header-line:\n{cur_header_line}"
+            assert cur_header_line == header_line, f"Noticing a different header-line:\n{cur_header_line}, file name is {full_name}"
             cur_data_line = handle.readline()
             assert cur_data_line != "", \
                 f"Seeing an empty data line. size_function is {size_func}, file name is {full_name}"
@@ -253,7 +253,12 @@ def batch_replace(target_dir: str, original: str, new: str):
 if __name__ == '__main__':
     algorithm = "faster-rcnn/customized-faster-rcnn"
     node_fit_segmentation_name = "mmdetection_bboxes"
-    for train_target_type in ["screenshots-increased-anchors", ]:
+    for train_target_type in [
+        "screenshots-edges-fine",
+        "screenshots-edges-coarse",
+        "screenshots",
+        # "screenshots-increased-anchors"
+    ]:
         print("Fitting segmentations.")
         batch_fit_segments(
             raw_inferences_dir=f"{algorithm}/inference_out/{train_target_type}/original_inferences",

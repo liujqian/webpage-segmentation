@@ -1,6 +1,6 @@
 {
-      "avg_bcuded_f1": 0.7041800824936986,
-      "avg_bcuded_recall": 0.5921104368804627,
-      "avg_bcuded_precision": 0.9683747061594487,
-      "avg_bcuded_f1star": 0.7348801401736843
+      "avg_bcuded_f1": 0.7053525185260473,
+      "avg_bcuded_recall": 0.5925542379360883,
+      "avg_bcuded_precision": 0.9683031030328308,
+      "avg_bcuded_f1star": 0.7352012157018698
 }
