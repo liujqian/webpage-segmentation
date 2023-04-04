@@ -6,7 +6,7 @@ from pathlib import Path
 
 if __name__ == '__main__':
     wd = os.getcwd()
-    enclosing_dir = "webis-webseg-20/webis-webseg-20-screenshots-edges/webis-webseg-20"
+    enclosing_dir = "webis-webseg-20-screenshots-edges/webis-webseg-20"
     copy_target_dir = os.path.join(wd, "htc/webis-webseg-20-screenshots-edges-fine")
     Path(copy_target_dir).mkdir(parents=True, exist_ok=True)
     target_file_name = "screenshot-edges-fine.png"
