@@ -1,3 +1,3 @@
 [submodule "faster-rcnn/customized-faster-rcnn"]
 	path = faster-rcnn/customized-faster-rcnn
-	url = https://gitee.com/liujqian/customized-faster-rcnn.git
+	url = https://github.com/liujqian/customized-simple-faster-rcnn-pytorch.git
