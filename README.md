@@ -1,5 +1,8 @@
 # EECE 570 Course Project -- Training Neural Networks for Web Page Segmentation
-Note: This repository contains other repository by Git submodule. Please ensure that you initialized all the submodules when cloning this repository.
+
+Note: This repository contains other repositories by Git submodule. Please ensure that you initialized all the
+submodules when cloning this repository (for example, add the -recurse-submodules flag when cloning).
+
 ## Obtaining the dataset and preprocess the dataset
 
 The Webis-Webseg-20 dataset used in this project can be downloaded from this
