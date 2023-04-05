@@ -1,3 +1,6 @@
 [submodule "faster-rcnn/customized-faster-rcnn"]
 	path = faster-rcnn/customized-faster-rcnn
 	url = https://github.com/liujqian/customized-simple-faster-rcnn-pytorch.git
+[submodule "yolox/original_yolox_repo"]
+	path = yolox/original_yolox_repo
+	url = https://github.com/liujqian/customized-YOLOX.git
