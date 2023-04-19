@@ -16,7 +16,7 @@ to work with other pre-processing scripts.
 
 The aggregate-pics.py script contains the code to separate a specific kind of data from the combined dataset. For
 example,
-it can extract all the screenshots to a single folder and rename all the "screenshot.png" to "<webpage-id>.png."
+it can extract all the screenshots to a single folder and rename all the "screenshot.png" to "\<webpage-id\>.png."
 
 The get-coco-formatted-annotations.py can transform all the annotations given in the Webis-Webseg-20 dataset to COCO
 formatted segmentation annotations and separate the data into a training set, a validation set and a test set.
