@@ -3,7 +3,7 @@
 Note: This repository contains other repositories by Git submodule. Please ensure that you initialized all the
 submodules when cloning this repository (for example, add the -recurse-submodules flag when cloning).
 
-## Obtaining the dataset and preprocess the dataset
+## Obtaining the dataset, preprocess the dataset, training and making inferences 
 
 The Webis-Webseg-20 dataset used in this project can be downloaded from this
 address: <https://zenodo.org/record/3988124#.ZCyTMdITF0J>.
@@ -32,7 +32,10 @@ instances_val2017.json and instances_test2017.json. Then softlink the extracted 
 created webis-webseg-20-screenshots folder, with names train2017, val2017 and test2017. By doing this I reuse
 the COCO dataloader provided in the YOLOX repository. Once the dataset folder is correctly set up,you can train the model 
 using the training script provided by the official YOLOX repository. Please refer to the readme file
-of that repository to train the YOLOX model. 
+of that repository to train the YOLOX model. Once a model is trained, use the infer.py script in the yolox folder
+to make inferences. For both the training process and the inference please use the exp file I customized. I customized 
+an exp file for this project which can be found in the yolox/exp folder. This file is modified from the example exp files
+given in the official yolox repository. 
 
 To use the dataset for the training of the HTC model, just update the variables encoding the paths of the screenshots
 folder and the annotations files in the htc/train_htc.py script.
