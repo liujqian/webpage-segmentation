@@ -41,13 +41,15 @@ on the models being evaluated and the training target type, you need to change t
 in this python script. 
 
 To use the dataset for the training of the HTC model, just update the variables encoding the paths of the screenshots
-folder and the annotations files in the htc/train_htc.py script.
+folder and the annotations files in the htc/train_htc.py script. To make inferences with the trained models, use the infer.py script 
+found in the htc folder. 
 
 Finally to use the dataset for training the Faster R-CNN model, create a directory called datasets in the
 faster-rcnn/customized-faster-rcnn directory. Then create a subfolder webis-webseg-20 in the newly created folder.
 Softlink the folder containing all the extracted screenshots to this webis-webseg-20 folder with the name
 webis-webseg-20-screenshots. Also softlink all the COCO formated annotations to this webis-webseg-20 folder with the
-names coco-formatted-info-{split}.json where {split} can be either train, val or test.
+names coco-formatted-info-{split}.json where {split} can be either train, val or test. To infere results, use the demo.py script
+found in the submoduled faster rcnn directory. 
 
 ## Acknowledgments
 
