@@ -30,7 +30,9 @@ the yolox/original-yolox-repo/datasets directory. Create a folder called annotat
 the generated COCO formatted annotations to the annotations directory, with names of instances_train2017.json,
 instances_val2017.json and instances_test2017.json. Then softlink the extracted screenshots three times under the
 created webis-webseg-20-screenshots folder, with names train2017, val2017 and test2017. By doing this I reuse
-the COCO dataloader provided in the YOLOX repository.
+the COCO dataloader provided in the YOLOX repository. Once the dataset folder is correctly set up,you can train the model 
+using the training script provided by the official YOLOX repository. Please refer to the readme file
+of that repository to train the YOLOX model. 
 
 To use the dataset for the training of the HTC model, just update the variables encoding the paths of the screenshots
 folder and the annotations files in the htc/train_htc.py script.
