@@ -43,7 +43,7 @@ in this python script.
 To use the dataset for the training of the HTC model, just update the variables encoding the paths of the screenshots
 folder and the annotations files in the htc/train_htc.py script. To make inferences with the trained models, use the infer.py script 
 found in the htc folder. The configuration file that needs to used for training is htc/mmdet-configs/htc/htc_x101_64x4d_fpn_16x1_20e_coco-copy.py
-but the configuration file used for inference is placed in the htc/customized-configuration folder. 
+but the configuration file used for inference is placed in the htc/customized-configs folder. 
 
 For both the htc model and the yolox model, to train the model by yourself you need to download the corresponding checkpoints specified in 
 the project report as the starting point for training. 
